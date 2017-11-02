@@ -1,10 +1,10 @@
 === All Countries Counties For WooCommerce ===
-Contributors: hoshomoh
+Contributors: hoshomoh, rodmontgt, bosunolanrewaju
 Donate link: https://github.com/hoshomoh/WooCommerce-All-Country-States <Just star the repo>
 Tags: e-commerce, woocommerce-counties, woocommerce-nigerian-states, woocommerce-uk-provinces, woocommerce-chile-counties, woocommerce-kenya-pronvinces, woocommerce-nigerian-LGA
 Requires at least: 4.1
-Tested up to: 4.6
-Stable tag: 1.0.5
+Tested up to: 4.8
+Stable tag: 1.1.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -24,6 +24,28 @@ The local government feauture is only available in Nigeria at the moment.
 * Nigeria
 * Chile
 * Kenya
+* Guatemala
+
+= Overriding local governments in theme function.php
+
+`
+add_filter( 'wc_add_counties_local_government', 'my_custom_lga' );
+
+function my_custom_lga( $local_governments ) { 
+	my_custom_lga_array = [
+        '' => __( 'Select an option...' , 'woocommerce' ),
+        'Agege/ijaiye' => __( 'Agege/ijaiye', 'woocommerce' ),
+        'Ajeromi/ifelodun' => __( 'Ajeromi/ifelodun', 'woocommerce' ),
+        'Alimosho' => __( 'Alimosho', 'woocommerce' ),
+        'Amuwo Odofin' => __( 'Amuwo Odofin', 'woocommerce' ),
+        'Apapa' => __( 'Apapa', 'woocommerce' ),
+    ];
+
+	$local_governments['NG']['LA'] = my_custom_lga_array;
+
+	return $local_governments;
+}
+`
 
 == Installation ==
 
@@ -63,28 +85,26 @@ Yes you can! Join in on our [GitHub repository](https://github.com/hoshomoh/WooC
 
 == Changelog ==
 
+= 1.1.0 - 18/09/2017 =
+* Feature - Added filters to override local governments collection in theme function
+
+= 1.0.6 - 07/12/2016 =
+* Feature - Added Guatemala Departments
+
 = 1.0.5 - 29/09/2016 =
 * Feature - Added local government to package destination
-
-= 1.0.4 - 28/09/2016 =
 * Feature - Added Support for re-calculating shipping fee when local government custom field(s) changes
 * Fix - Fix issue [#1](https://github.com/hoshomoh/All-Countries-Counties-For-WooCommerce/issues/1)
-
-= 1.0.3 - 24/09/2016 =
 * Fix - Added Mixing files
-
-= 1.0.2 - 24/09/2016 =
 * Feature - Added Support for Local Government
 * Feature - Added Local Government for Nigerian States
 * Feature - Added Local Government field to checkout for Nigeria
-
-= 1.0.1 - 16/06/2016 =
 * Feature - Added Chile provinces
 * Feature - Added Kenya Counties
 * Fix - Displayed Admin Notice when WooCommerce is not installed or Activated
-
-= 1.0.0 - 11/06/2016 =
 * Feature - Added states for Nigeria and United Kingdom
 
 == Upgrade Notice ==
-This is the initial release of the plugin. Install and enjoy.
+
+= 1.1.0 =
+* Added Feature to override local governments collection in theme function.php file.

@@ -3,7 +3,7 @@
 Plugin Name: All Countries Counties For WooCommerce
 Plugin URI: https://github.com/hoshomoh/WooCommerce-All-Country-States
 Description: A Wordpress WooCommerce Plugin that add counties/provinces/states for WooCommerce Countries
-Version: 1.0.5
+Version: 1.1.0
 Author: Oforomeh Oshomo
 Author URI: http://hoshomoh.github.io/
 */
@@ -55,13 +55,14 @@ if ( ! class_exists( 'WC_All_Country_Counties' ) ) :
             if ( class_exists( 'WC_Integration' ) ) {
                 add_filter( 'woocommerce_states', array( $this, 'wc_add_counties' ) );
                 if ( ! empty( $this->get_countries_with_local_government() ) ) {
-                    add_filter('woocommerce_checkout_fields', array($this, 'wc_add_local_government_fields'));
-                    add_action( 'wp_enqueue_scripts', array($this, 'wc_local_government_checkout_field_enqueue_script'));
-                    add_action('woocommerce_checkout_process', array($this, 'wc_process_local_government_fields'));
-                    add_action( 'woocommerce_checkout_update_order_meta', array($this, 'wc_save_local_government_fields'));
+                    add_filter( 'woocommerce_checkout_fields', array($this, 'wc_add_local_government_fields') );
+                    add_action( 'wp_enqueue_scripts', array($this, 'wc_local_government_checkout_field_enqueue_script') );
+                    add_action( 'woocommerce_checkout_process', array($this, 'wc_process_local_government_fields') );
+                    add_action( 'woocommerce_checkout_update_order_meta', array($this, 'wc_save_local_government_fields') );
                     add_action( 'woocommerce_admin_order_data_after_billing_address', array($this, 'wc_billing_local_government_checkout_field_display_admin_order_meta'), 10, 1 );
                     add_action( 'woocommerce_admin_order_data_after_shipping_address', array($this, 'wc_shipping_local_government_checkout_field_display_admin_order_meta'), 10, 1 );
                     add_filter( 'woocommerce_cart_shipping_packages', array($this,'wc_add_local_government_to_cart_shipping_packages') );
+                    add_filter( 'woocommerce_checkout_update_customer_data', array( $this, 'wc_update_customer_data' ) );
                 }
             } else {
                 // throw an admin error if you like
@@ -108,7 +109,7 @@ if ( ! class_exists( 'WC_All_Country_Counties' ) ) :
                 }
             }
 
-            return $local_governments;
+            return apply_filters( 'wc_add_counties_local_government', $local_governments );
         }
 
         /**
@@ -141,7 +142,7 @@ if ( ! class_exists( 'WC_All_Country_Counties' ) ) :
                 )
             );
 
-            return $fields;
+            return apply_filters( 'wc_add_local_government_fields', $fields );
         }
 
         /**
@@ -174,6 +175,29 @@ if ( ! class_exists( 'WC_All_Country_Counties' ) ) :
                     update_post_meta( $order_id, 'Shipping Local Government', sanitize_text_field( $_POST['billing_local_government'] ) );
                 }
             }
+        }
+
+        /**
+         * Callback to update logged in customer's data
+         * Hooks to 'woocommerce_checkout_update_customer_data' filter
+         *
+         * @param  bool $should_update
+         * @param  object $checkout
+         */
+        public function wc_update_customer_data($should_update, $checkout) {
+            if ( ! empty( $_POST['billing_local_government'] ) ) {
+                $this->_update_customer( 'billing_local_government', sanitize_text_field( $_POST['billing_local_government'] ) );
+            }
+
+            if ( ! empty( $_POST['shipping_local_government'] ) ) {
+                $this->_update_customer( 'shipping_local_government', sanitize_text_field( $_POST['shipping_local_government'] ) );
+            }else {
+                if ( ! empty( $_POST['billing_local_government'] ) ) {
+                    $this->_update_customer( 'billing_local_government', sanitize_text_field( $_POST['billing_local_government'] ) );
+                }
+            }
+
+            return $should_update;
         }
 
         /**
@@ -274,6 +298,18 @@ if ( ! class_exists( 'WC_All_Country_Counties' ) ) :
          */
         public function outputLastError() {
             $this->outputNotice( $this->error, false );
+        }
+
+        /**
+         * Update logged in customer's data
+         *
+         * @param  string   $meta_key   Key of the data to add
+         * @param  mixed    $meta_value      Value to be added
+         */
+        private function _update_customer($meta_key, $meta_value) {
+            if ( $checkout->customer_id ) {
+                WC()->customer[ $meta_key ] = $meta_value;
+            }
         }
 
     }
